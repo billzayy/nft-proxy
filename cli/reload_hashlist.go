@@ -96,6 +96,7 @@ func reloadRemote(hashes Hashlist) error {
 		_, err := c.Get(fmt.Sprintf("https://api.degencdn.com/v1/nfts/%s/image.jpg", h))
 		if err != nil {
 			log.Printf("Failed media: %s - %s", h, err)
+			return err
 		}
 	}
 	return nil
@@ -107,6 +108,7 @@ func reloadLocally(img *services.SolanaImageService, hashes Hashlist) error {
 		_, err := img.Media(h, true)
 		if err != nil {
 			log.Printf("Failed media: %s - %s", h, err)
+			return err
 		}
 	}
 	return nil

@@ -52,9 +52,7 @@ func (svc *ResizeService) Resize(data []byte, out io.Writer, size int) error {
 	switch typ {
 	case "png":
 		return png.Encode(out, dst)
-	case "jpeg":
-		return jpeg.Encode(out, dst, &jpeg.Options{Quality: 100})
-	case "jpg":
+	case "jpeg", "jpg":
 		return jpeg.Encode(out, dst, &jpeg.Options{Quality: 100})
 	default:
 		log.Printf("Unsupported media type (%s) encoding as jpeg", typ)
@@ -68,7 +66,10 @@ func (svc *ResizeService) resizeGif(data []byte, width, height int) (*gif.GIF, e
 		return nil, err
 	}
 
-	if width == 0 {
+	if width == 0 && height == 0 {
+		width = im.Config.Width
+		height = im.Config.Height
+	}else if width == 0 {
 		width = int(im.Config.Width * height / im.Config.Width)
 	} else if height == 0 {
 		height = int(width * im.Config.Height / im.Config.Width)

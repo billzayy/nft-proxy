@@ -5,12 +5,12 @@ import "strings"
 type NFTMetadataSimple struct {
 	Name     string `json:"name"`
 	Symbol   string `json:"symbol"`
-	Decimals uint8  `json:"-"`
+	Decimals uint8  `json:"decimals"`
 	//Description          string               `json:"description"`
 	//SellerFeeBasisPoints float64              `json:"seller_fee_basis_points"`
 	Image        string `json:"image"`
-	AnimationURL string `json:"animation_url"`
-	ExternalURL  string `json:"external_url"`
+	AnimationURL string `json:"animationUrl"`
+	ExternalURL  string `json:"externalUrl"`
 	//Collection   NFTCollectionSimple `json:"collection"`
 	Properties NFTPropertiesSimple `json:"properties"`
 	//Attributes           []NFTAttributeSimple `json:"attributes"`
@@ -60,7 +60,7 @@ type NFTCreatorSimple struct {
 }
 
 type NFTAttributeSimple struct {
-	TraitType string      `json:"trait_type"`
+	TraitType string      `json:"traitType"`
 	Value     interface{} `json:"value"`
 }
 

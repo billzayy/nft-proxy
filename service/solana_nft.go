@@ -29,10 +29,24 @@ func (svc SolanaImageService) Id() string {
 }
 
 func (svc *SolanaImageService) Start() error {
+	var err error
 	svc.http = &http.Client{Timeout: 5 * time.Second}
 
-	svc.sql = svc.Service(SQLITE_SVC).(*SqliteService)
-	svc.sol = svc.Service(SOLANA_SVC).(*SolanaService)
+	sqlService, err = svc.Service(SQLITE_SVC).(*SqliteService)
+
+	if err != nil {
+		return err
+	}
+	
+	solService, err= svc.Service(SOLANA_SVC).(*SolanaService)
+	
+	if err != nil {
+		return err
+	}
+
+	svc.sql = sqlService 
+	svc.sol = solService
+
 	return nil
 }
 
@@ -40,10 +54,13 @@ func (svc *SolanaImageService) Media(key string, skipCache bool) (*nft_proxy.Med
 	var media *nft_proxy.SolanaMedia
 	err := svc.sql.Db().First(&media, "mint = ?", key).Error
 	if err != nil || skipCache {
-		log.Printf("FetchMetadata - %s err: %s", key, err)
+		if err != nil {
+			log.Printf("FetchMetadata - %s err: %s", key, err)
+		}
+
 		media, err = svc.FetchMetadata(key)
 		if err != nil {
-			return nil, err //Still cant get metadata
+			return nil, err
 		}
 	}
 
@@ -51,7 +68,13 @@ func (svc *SolanaImageService) Media(key string, skipCache bool) (*nft_proxy.Med
 }
 
 func (svc *SolanaImageService) RemoveMedia(key string) error {
-	return svc.sql.Db().Delete(&nft_proxy.SolanaMedia{}, "mint = ?", key).Error
+	err := svc.sql.Db().Delete(&nft_proxy.SolanaMedia{}, "mint = ?", key).Error
+
+	if err != nil {
+		return err
+	}
+	
+	return nil 
 }
 
 func (svc *SolanaImageService) FetchMetadata(key string) (*nft_proxy.SolanaMedia, error) {

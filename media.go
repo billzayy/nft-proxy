@@ -22,7 +22,7 @@ type SolanaMedia struct {
 	Mint            string    `json:"mint" gorm:"uniqueIndex"`
 	MintDecimals    uint8     `json:"decimals"`
 	ImageUri        string    `json:"imageUri"`
-	ImageType       string    `json:"ImageType"`
+	ImageType       string    `json:"imageType"`
 	MediaUri        string    `json:"mediaUri"`
 	MediaType       string    `json:"mediaType"`
 	LocalPath       string    `json:"-"`

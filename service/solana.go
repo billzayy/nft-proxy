@@ -50,8 +50,14 @@ func (svc *SolanaService) TokenData(key solana.PublicKey) (*token_metadata.Metad
 	var meta token_metadata.Metadata
 	var mint token_2022.Mint
 
+	publicKey, err := solana.MustPublicKeyFromBase58("META4s4fSmpkTbZoUsgC1oBnWB31vQcmnN8giPw51Zu")
+
+	if err != nil {
+		return nil, 0, err
+	}
+
 	ata, _, _ := svc.FindTokenMetadataAddress(key, solana.TokenMetadataProgramID)
-	ataT22, _, _ := svc.FindTokenMetadataAddress(key, solana.MustPublicKeyFromBase58("META4s4fSmpkTbZoUsgC1oBnWB31vQcmnN8giPw51Zu"))
+	ataT22, _, _ := svc.FindTokenMetadataAddress(key, publicKey)
 
 	accs, err := svc.client.GetMultipleAccountsWithOpts(ctx.TODO(), []solana.PublicKey{key, ata, ataT22}, &rpc.GetMultipleAccountsOpts{Commitment: rpc.CommitmentProcessed})
 	if err != nil {
@@ -63,9 +69,10 @@ func (svc *SolanaService) TokenData(key solana.PublicKey) (*token_metadata.Metad
 		//log.Printf("SolanaService::TokenData:%s - Owner: %s", key, accs.Value[0].Owner)
 
 		err := mint.UnmarshalWithDecoder(bin.NewBinDecoder(accs.Value[0].Data.GetBinary()))
-		if err == nil {
-			decimals = mint.Decimals
+		if err != nil {
+			return nil, decimals, err
 		}
+		decimals = mint.Decimals
 
 		switch accs.Value[0].Owner {
 		case nft_proxy.METAPLEX_CORE:
@@ -80,8 +87,7 @@ func (svc *SolanaService) TokenData(key solana.PublicKey) (*token_metadata.Metad
 		case nft_proxy.TOKEN_2022:
 			exts, err := mint.Extensions()
 			if err != nil {
-				log.Printf("T22 Ext err: %s", err)
-				break
+				return nil, decimals, err
 			}
 			if exts != nil && exts.TokenMetadata != nil {
 				return &token_metadata.Metadata{

@@ -2,13 +2,15 @@ package services
 
 import (
 	"errors"
+	"log"
+	"os"
+
 	nft_proxy "github.com/alphabatem/nft-proxy"
+
 	"github.com/babilu-online/common/context"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"os"
 )
 
 type SqliteService struct {
@@ -37,12 +39,18 @@ func (ds SqliteService) Db() *gorm.DB {
 func (ds *SqliteService) Configure(ctx *context.Context) error {
 	ds.database = os.Getenv("DB_DATABASE")
 
+	if ds.database == ""{
+		return errors.New("")
+	}
+
 	return ds.DefaultService.Configure(ctx)
 }
 
 // Start the service and open connection to the database
 // Migrate any tables that have changed since last runtime
-func (ds *SqliteService) Start() (err error) {
+func (ds *SqliteService) Start() error {
+	var err error
+
 	ds.db, err = gorm.Open(sqlite.Open(ds.database), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Error),
 	})
@@ -60,7 +68,7 @@ func (ds *SqliteService) Start() (err error) {
 
 //Find returns the db query for a statement
 func (ds *SqliteService) Find(out interface{}, where string, args ...interface{}) error {
-	return ds.error(ds.db.Find(out, where, args).Error)
+	return ds.error(ds.db.Find(out, where, args...).Error)
 }
 
 // Create a new item in the SqliteService
@@ -83,8 +91,8 @@ func (ds *SqliteService) Delete(val interface{}) error {
 
 //Migrate creates any new tables needed
 func (ds *SqliteService) Migrate(values ...interface{}) error {
-	err := ds.db.AutoMigrate(values).Error()
-	if err != "" {
+	err := ds.db.AutoMigrate(values...)
+	if err != nil {
 		return errors.New(err)
 	}
 	return nil
@@ -92,7 +100,15 @@ func (ds *SqliteService) Migrate(values ...interface{}) error {
 
 //Shutdown Gracefully close the database connection
 func (ds *SqliteService) Shutdown() {
-	//
+	sqlDB, err := ds.db.DB()
+
+	if err != nil {
+		log.Println("Error with DB:", err)
+		return
+	}
+
+	sqlDB.Close()
+	log.Println("Database has been shutdown.")
 }
 
 // Parse an error returned from the database into a more contextual error that can be used with http response codes

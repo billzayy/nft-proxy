@@ -46,14 +46,14 @@ func (svc *ImageService) Start() error {
 	svc.defaultSize = 720 //Gifs will be half the size
 
 	svc.exemptImages = map[string]struct{}{
-		"2kMpEJCZL8vEDZe7YPLMCS9Y3WKSAMedXBn7xHPvsWvi": {},
-		"7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU": {},
-		"AFbX8oGjGpmVFywbVouvhQSRmiW2aR1mohfahi4Y2AdB": {},
-		"CKfatsPMUf8SkiURsDXs7eK6GWb4Jsd6UDbs7twMCWxo": {},
-		"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {},
-		"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB": {},
-		"mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So":  {},
-		"So11111111111111111111111111111111111111112":  {},
+		"2kMpEJCZL8vEDZe7YPLMCS9Y3WKSAMedXBn7xHPvsWvi.jpg": {},
+		"7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU.jpg": {},
+		"AFbX8oGjGpmVFywbVouvhQSRmiW2aR1mohfahi4Y2AdB.jpg": {},
+		"CKfatsPMUf8SkiURsDXs7eK6GWb4Jsd6UDbs7twMCWxo.jpg": {},
+		"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v.jpg": {},
+		"Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB.jpg": {},
+		"mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So.jpg":  {},
+		"So11111111111111111111111111111111111111112.jpg":  {},
 	}
 
 	return nil
@@ -61,7 +61,7 @@ func (svc *ImageService) Start() error {
 
 func (svc *ImageService) Media(key string, skipCache bool) (*nft_proxy.Media, error) {
 	if svc.IsSolKey(key) {
-		return svc.solSvc.Media(key, skipCache)
+		return svc.solSvc.Media(key, skipCache), nil
 	}
 
 	return nil, errors.New("invalid key")

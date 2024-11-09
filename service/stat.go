@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	nft_proxy "github.com/alphabatem/nft-proxy"
 	"github.com/babilu-online/common/context"
 	"sync/atomic"
@@ -23,7 +25,13 @@ func (svc StatService) Id() string {
 }
 
 func (svc *StatService) Start() error {
-	svc.sql = svc.Service(SQLITE_SVC).(*SqliteService)
+	service, ok := svc.Service(SQLITE_SVC).(*SqliteService)
+
+	if !ok {
+		return svc.Service(SQLITE_SVC)
+	}
+
+	svc.sql = service
 
 	return nil
 }
@@ -42,7 +50,12 @@ func (svc *StatService) IncrementMediaRequests() {
 
 func (svc *StatService) ServiceStats() (map[string]interface{}, error) {
 	var imgCount int64
-	svc.sql.Db().Model(&nft_proxy.SolanaMedia{}).Count(&imgCount)
+	
+	err := svc.sql.Db().Model(&nft_proxy.SolanaMedia{}).Count(&imgCount).Error // define error
+
+	if err != nil { 
+		return nil, fmt.Errorf("error Solana Record: %w", err) // return the Solana Record counting is error
+	}
 
 	return map[string]interface{}{
 		"images_stored":      imgCount,

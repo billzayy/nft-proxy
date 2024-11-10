@@ -91,6 +91,15 @@ func (svc *SolanaImageService) FetchMetadata(key string) (*nft_proxy.SolanaMedia
 	return media, nil
 }
 
+func (svc *SolanaImageService) FetchAccount(key string) (*ntf_proxy.NFTMetadataSimple, error){
+	metadata, err := svc._retrieveMetadata(key)
+	if err != nil {
+		return nil, err
+	}	
+
+	return metadata, nil
+}
+
 func (svc *SolanaImageService) _retrieveMetadata(key string) (*nft_proxy.NFTMetadataSimple, error) {
 	pk, err := solana.PublicKeyFromBase58(key)
 	if err != nil {
@@ -102,7 +111,7 @@ func (svc *SolanaImageService) _retrieveMetadata(key string) (*nft_proxy.NFTMeta
 		return nil, err
 	}
 
-	//log.Printf("TokenData retreive (%v): %+v\n", decimals, tokenData)
+	//log.Printf("TokenData retrieve (%v): %+v\n", decimals, tokenData)
 
 	switch tokenData.Protocol {
 	case token_metadata.PROTOCOL_METAPLEX_CORE:

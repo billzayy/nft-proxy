@@ -2,9 +2,9 @@ package nft_proxy
 
 import "github.com/gagliardetto/solana-go"
 
-const (
-	BASE64_PREFIX = ";base64,"
-)
+// const (
+// 	BASE64_PREFIX = ";base64,"
+// )
 
 var (
 	METAPLEX_CORE = solana.MustPublicKeyFromBase58("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d")

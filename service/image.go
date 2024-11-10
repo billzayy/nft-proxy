@@ -37,9 +37,25 @@ func (svc ImageService) Id() string {
 }
 
 func (svc *ImageService) Start() error {
-	svc.solSvc = svc.Service(SOLANA_IMG_SVC).(*SolanaImageService)
-	svc.sql = svc.Service(SQLITE_SVC).(*SqliteService)
-	svc.resize = svc.Service(RESIZE_SVC).(*ResizeService)
+	solImg , err := svc.Service(SOLANA_IMG_SVC).(*SolanaImageService)
+	if err != nil {
+		return err
+	}
+
+	sqlSvc, err := svc.Service(SQLITE_SVC).(*SqliteService)
+	if err != nil {
+		return err
+	}
+
+	resizeSVC , err := svc.Service(RESIZE_SVC).(*ResizeService)
+	if err != nil {
+		return err
+	}
+
+	
+	svc.solSvc = solImg 
+	svc.sql = sqlSvc
+	svc.resize = resizeSVC
 
 	svc.httpMedia = &http.Client{Timeout: 10 * time.Second}
 

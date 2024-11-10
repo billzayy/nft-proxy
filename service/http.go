@@ -60,8 +60,20 @@ func (svc *HttpService) Configure(ctx *context.Context) error {
 }
 
 func (svc *HttpService) Start() error {
-	svc.imgSvc = svc.Service(IMG_SVC).(*ImageService)
-	svc.statSvc = svc.Service(STAT_SVC).(*StatService)
+	image, err := svc.Service(IMG_SVC).(*ImageService)
+		
+	if err != nil {
+		return err
+	}		
+
+	stats, err := svc.Service(STAT_SVC).(*StatService)
+	
+	if err != nil {
+		return err
+	}
+
+	svc.imgSvc = image
+	svc.statSvc = stats
 
 	r := gin.Default()
 

@@ -40,7 +40,7 @@ func (m *NFTMetadataSimple) ImageFile() *NFTFiles {
 }
 
 type NFTFiles struct {
-	URL  string `json:"URL"`
+	URL  string `json:"url"`
 	Type string `json:"type"`
 }
 

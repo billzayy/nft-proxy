@@ -6,6 +6,9 @@ import (
 	services "github.com/alphabatem/nft-proxy/services"
 	"github.com/gagliardetto/solana-go"
 	"log"
+	"io"
+	"net/http"
+	"os"
 )
 
 var solSvc SolanaService
@@ -145,40 +148,74 @@ func (l *collectionLoader) metaDataWorker() {
 
 		log.Printf("Fetching metadata from URI: %s", assetURI)
 
-		// Fetch the asset metadata using the URI
-		assetMetadata, err := l.fetchMetadata(assetURI)
+		resp, err := http.Get(assetURI)
 		if err != nil {
-			log.Printf("Error fetching metadata from URI %s: %v", assetURI, err)
-			continue
+			log.Fatalf("failed to fetch metadata from URI %s: %w", uri, err)
 		}
-		// Pass the fetched metadata to the fileDataWorker
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("failed to read response body: %w", err)
+		}
+
+		var assetMetadata nft_proxy.NFTMetadataSimple
+
+		err = json.Unmarshal(body, &metadata)
+		if err != nil {
+			log.Fatalf("failed to unmarshal JSON data: %w", err)
+		}
+
 		l.fileDataIn <- assetMetadata
 	}
 }
 
 //Downloads required files & passes to `mediaWorker`
-func (l *collectionLoader) fileDataWorker(assetURI token_metadata.Data) {
+func (l *collectionLoader) fileDataWorker() {
+	filePath := "./raw_cache/solona/"
 	for assetMetadata := range l.fileDataIn {
 		log.Printf("Downloading file: %s", assetMetadata.URI)
 
-		// Simulate file download (replace with actual download logic)
-		// Assuming we download and create media file metadata
+		response, err := http.Get(assetMetadata.URI)
+		if err != nil {
+			log.Fatalf("failed to download file: %v", err)
+		}
+		defer response.Body.Close()
+
+		// Create the local file
+		file, err := os.Create(filepath)
+		if err != nil {
+			log.Fatalf("failed to create file: %v", err)
+		}
+		defer file.Close()
+
+		_, err = io.Copy(file, response.Body)
+		if err != nil {
+			log.Fatalf("failed to save file: %v", err)
+		}
+
 		media := &nft_proxy.Media{
 			MediaUri: assetMetadata.ImageUri,
 		}
 
-		// Pass the media data to mediaWorker
 		l.mediaIn <- media
 	}	
 }
 
 //Stores media data down to SQL
 func (l *collectionLoader) mediaWorker() {
-	var solImgSvc services.SolanaImageService
+	var db *services.SqliteService
+
+	err := db.Start()
+	if err != nil {
+		log.Fatalf(err)
+	}
+
+	defer db.Shutdown()
 
     for m := range l.mediaIn {
         // Error handling for database saving
-        err := 
+        _, err = db.Create(m.MediaURI)
         if err != nil {
             log.Printf("Error saving media: %v", err)
         }
